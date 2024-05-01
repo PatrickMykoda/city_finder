@@ -1,0 +1,44 @@
+/* 
+ * Always set the map height explicitly to define the size of the div element
+ * that contains the map. 
+ */
+ #map {
+    height: 80%;
+}
+  
+/* 
+* Optional: Makes the sample page fill the window. 
+*/
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#question-box {
+    display: flex;
+    height: 20%;
+    background-color: azure;
+    align-items: center;
+    gap: 50px;
+}
+
+#question-text {
+    padding: 20px;
+    color: darkblue;
+    font-size: 3rem;
+}
+
+#next-button {
+    padding: 10px;
+    color: darkblue;
+    font-size: 2rem;
+    background-color: lightskyblue;
+    border-radius: 10px;
+}
+
+.hide {
+    display: None;
+}
+  
