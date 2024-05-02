@@ -15,8 +15,6 @@ next_button.addEventListener("click", nextQuestion);
 // Initialization of the map //
 ///////////////////////////////
 async function initMap() {
-  // The location London
-  const position = { lat: -25.344, lng: 131.031 };
   
   // Requesting the necessary Google libraries
   const { Map, InfoWindow  } = await google.maps.importLibrary("maps");
@@ -27,7 +25,7 @@ async function initMap() {
     center:new google.maps.LatLng( 47.35953600, 8.63564520),
     zoom:5,
     mapTypeId: 'terrain',
-    //mapId: 'a2042d9e1814e9c',
+    mapId: 'a2042d9e1814e9c',
   };
 
   // The map, centered at London
@@ -35,7 +33,7 @@ async function initMap() {
   map.setTilt(45);
 
   // Adding map styles
-  var customStyled = [
+  /*var customStyled = [
     {
       featureType: "all",
       elementType: "labels",
@@ -44,8 +42,8 @@ async function initMap() {
       ],
     }
   ];
-  map.set('styles', customStyled);
-  map.setOptions({draggableCursor: "url(http://127.0.0.1:5500/city_finder/map_pin.svg) 500 670, pointer"});
+  map.set('styles', customStyled);*/
+  map.setOptions({draggableCursor: "url(http://127.0.0.1:5500/src/map_pin.svg) 500 670, pointer"});
  
   // Initializing event listener
   google.maps.event.addListener(map, 'click', function(event) {
@@ -83,7 +81,8 @@ function checkPlace(map, click){
         });
         circle_city.setMap(map);
   
-        const pinImage_svg = "http://127.0.0.1:5500/city_finder/map_pin_small_new.svg";
+        // Creating Marker with legacy Marker Element
+        /*const pinImage_svg = "http://127.0.0.1:5500/src/map_pin_small_new.svg";
 
         var marker_city = new google.maps.Marker({
           map: map,
@@ -91,7 +90,18 @@ function checkPlace(map, click){
           animation:google.maps.Animation.DROP,
           icon: pinImage_svg,
           //anchor: new google.maps.Point(0, -670)
+        });*/
+
+        // Creating Marker with Advanced Marker Element
+        const pinImage = document.createElement("img");
+        pinImage.src = "http://127.0.0.1:5500/src/map_pin_even_smaller.png";
+
+        const marker_city = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: click,
+            content: pinImage,
         });
+          
         marker_city.setMap(map);
         smoothlyZoomWorkarround(11, location_city);
 
