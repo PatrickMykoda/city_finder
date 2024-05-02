@@ -41,4 +41,13 @@ body {
 .hide {
     display: None;
 }
+
+#recenter-button {
+    margin: auto;
+    width: 10%;
+    height: 10%;
+    text-align: center;
+    background-color: azure;
+    z-index: 10000;
+}
   

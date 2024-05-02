@@ -47,7 +47,7 @@ async function initMap() {
  
   // Initializing event listener
   google.maps.event.addListener(map, 'click', function(event) {
-    checkPlace(map, event.latLng);
+    guessLocation(map, event.latLng);
   });
 }
 
@@ -65,60 +65,79 @@ startQuestion();
 //////////////////////////
 // Functions for events //
 //////////////////////////
-function checkPlace(map, click){    
-    // Getting current city location
-    let location_city = new google.maps.LatLng(current_city.lat, current_city.lng);
+function guessLocation(map, click){
+  // Getting current city location
+  let currentCityLocation = new google.maps.LatLng(current_city.lat, current_city.lng);
 
-    if (Math.abs(click.lat() - location_city.lat()) < 0.1 && Math.abs(click.lng() - location_city.lng()) < 0.1){
-        var circle_city = new google.maps.Circle({
-            center: location_city,
-            radius:10000,
-            strokeColor:"#0000FF",
-            strokeOpacity:0.8,
-            strokeWeight:2,
-            fillColor:"#0000FF",
-            fillOpacity:0.4
-        });
-        circle_city.setMap(map);
-  
-        // Creating Marker with legacy Marker Element
-        /*const pinImage_svg = "http://127.0.0.1:5500/src/map_pin_small_new.svg";
+  if (checkPlace(click, currentCityLocation) == true){
+    // code executes in case of right guess
+    var circle_city = new google.maps.Circle({
+      center: currentCityLocation,
+      radius:10000,
+      strokeColor:"#0000FF",
+      strokeOpacity:0.4,
+      strokeWeight:2,
+      fillColor:"#0000FF",
+      fillOpacity:0.2
+    });
+    circle_city.setMap(map);
 
-        var marker_city = new google.maps.Marker({
-          map: map,
-          position: click,
-          animation:google.maps.Animation.DROP,
-          icon: pinImage_svg,
-          //anchor: new google.maps.Point(0, -670)
-        });*/
+    // Creating Marker with legacy Marker Element
+    /*const pinImage_svg = "http://127.0.0.1:5500/src/map_pin_small_new.svg";
 
-        // Creating Marker with Advanced Marker Element
-        const pinImage = document.createElement("img");
-        pinImage.src = "http://127.0.0.1:5500/src/map_pin_even_smaller.png";
+    var marker_city = new google.maps.Marker({
+      map: map,
+      position: click,
+      animation:google.maps.Animation.DROP,
+      icon: pinImage_svg,
+      //anchor: new google.maps.Point(0, -670)
+    });*/
 
-        const marker_city = new google.maps.marker.AdvancedMarkerElement({
-            map,
-            position: click,
-            content: pinImage,
-        });
-          
-        marker_city.setMap(map);
-        smoothlyZoomWorkarround(11, location_city);
+    // Creating Marker with Advanced Marker Element
+    const pinImage = document.createElement("img");
+    pinImage.src = "http://127.0.0.1:5500/src/map_pin_even_smaller.png";
 
-        var infowindow = new google.maps.InfoWindow({
-          content: "Congratulations! You found " + current_city.name +"!"
-        });
-        infowindow.open(map,marker_city);
+    const markerCity = new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: click,
+        content: pinImage,
+    });
+      
+    markerCity.setMap(map);
+    smoothlyZoomWorkarround(11, currentCityLocation);
 
-        /*window.setTimeout(() => {
-          smoothlyZoomWorkarround(5);
-          const center = new google.maps.LatLng( 47.35953600, 8.63564520);
-          map.setCenter(center);
-          infowindow.close();
-        }, 5000);*/
+    var infowindow = new google.maps.InfoWindow({
+      content: "Congratulations! You found " + current_city.name +"!"
+    });
+    infowindow.open(map,markerCity);
 
-        next_button.classList.remove('hide');
-      }
+    window.setTimeout(() => {
+      infowindow.close();
+    }, 3000);
+
+    next_button.classList.remove('hide');
+
+
+    //TODO => Button for recentring
+  } else {
+    //Todo animation for wrong guess
+  }
+}
+
+function getTip (){
+  //TODO circle searched city
+}
+
+function removeTips(){
+  //TODO remove all tips after city is found
+}
+
+function checkPlace(click, currentCityLocation){    
+    if (Math.abs(click.lat() - currentCityLocation.lat()) < 0.1 && Math.abs(click.lng() - currentCityLocation.lng()) < 0.1){
+      return true;
+    } else {
+      return false;
+    }
 }
 
 function nextQuestion(){
