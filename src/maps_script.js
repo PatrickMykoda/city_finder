@@ -20,9 +20,11 @@ async function initMap() {
   const { Map, InfoWindow  } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement, PinElement  } = await google.maps.importLibrary("marker");
 
-  //
+
+  const mapCenter = new google.maps.LatLng( 47.35953600, 8.63564520)
+  
   var mapProp= {
-    center:new google.maps.LatLng( 47.35953600, 8.63564520),
+    center: mapCenter,
     zoom:5,
     mapTypeId: 'terrain',
     mapId: 'a2042d9e1814e9c',
@@ -49,6 +51,21 @@ async function initMap() {
   google.maps.event.addListener(map, 'click', function(event) {
     guessLocation(map, event.latLng);
   });
+
+  // Adding event listener for recentering the map
+  google.maps.event.addListenerOnce(map, 'drag', () => {
+    const recenterDiv = document.createElement("div");
+    const recenterButton = document.createElement("button");
+
+    recenterButton.setAttribute("id","recenter-button");
+    recenterButton.innerText = "Recenter the map";
+    recenterButton.addEventListener("click", () => {
+      // Reset the example by reloading the map iframe.
+      smoothlyZoomWorkarround(5, mapCenter);
+    });
+    recenterDiv.appendChild(recenterButton);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(recenterDiv);
+  })
 }
 
 initMap();
@@ -116,11 +133,9 @@ function guessLocation(map, click){
     }, 3000);
 
     next_button.classList.remove('hide');
-
-
-    //TODO => Button for recentring
   } else {
     //Todo animation for wrong guess
+    
   }
 }
 
