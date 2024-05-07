@@ -176,6 +176,7 @@ function markCorrectGuess(click, currentCityLocation){
   tipButton.classList.add('hide');
   nextButton.classList.remove('hide');
   currentTip.setMap();
+  currentTip = null;
 }
 
 
@@ -203,14 +204,28 @@ function markWrongGuess(click){
 /* GET TIP
 This function creates a circle that is centered around a random point within 0-1° latitude and longitude from the current city's location*/
 
-function getTip (){
-  let almostLat = currentCity.lat + ranNum();
-  let almostLng = currentCity.lng + ranNum();
+function getTip(){
+  if (!currentTip){
+    setTip(2, 225000, 7);
+    tipButton.innerText = "Get even hotter tip";
+  } else {
+    currentTip.setMap();
+    setTip(0.5, 65000, 9)
+    tipButton.classList.add('hide');
+    tipButton.innerText = "Get tip";
+  }
+}
+
+/* SET TIP 
+This function sets the circle on the map wich serves as the tip */
+function setTip(maxDist, radius, maxZoom){
+  let almostLat = currentCity.lat + ranNum(maxDist);
+  let almostLng = currentCity.lng + ranNum(maxDist);
   let almostCurrentCityLocation = new google.maps.LatLng(almostLat, almostLng);
 
   currentTip = new google.maps.Circle({
     center: almostCurrentCityLocation,
-    radius:150000,
+    radius:radius,
     strokeColor:"#0000FF",
     strokeOpacity:0.2,
     strokeWeight:1,
@@ -219,7 +234,12 @@ function getTip (){
     clickable: false
   });
   currentTip.setMap(map);
-  smoothlyZoomWorkarround(map.getZoom(), almostCurrentCityLocation);
+    
+  let zoom = map.getZoom();
+  if (zoom > maxZoom) {
+    zoom = maxZoom;
+  }    
+  smoothlyZoomWorkarround(zoom, almostCurrentCityLocation);
 }
 
 function removeTips(){
@@ -227,11 +247,11 @@ function removeTips(){
 }
 
 
-/* RANDOM NUMBER BETWEEN -1 and 1 
-This function returns a random number  between -1 and 1 */
-function ranNum(){
-  let ranNum = Math.random();
-  let posOrNeg = Math.round(Math.random);
+/* RANDOM NUMBER
+This function returns a random number  between "maxNum" and minus "maxNum" */
+function ranNum(maxNum){
+  let ranNum = Math.random() * maxNum;
+  let posOrNeg = Math.round(Math.random());
   if (posOrNeg === 0){
     ranNum *= -1;
   }
