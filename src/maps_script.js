@@ -135,6 +135,21 @@ function guessLocation(map, click){
     next_button.classList.remove('hide');
   } else {
     //Todo animation for wrong guess
+    // Creating Marker with Advanced Marker Element
+    const failImage = document.createElement("img");
+    failImage.setAttribute("class", "fail-icon");
+    failImage.src = "http://127.0.0.1:5500/src/small_fail_icon.png";
+
+    const markerFail = new google.maps.marker.AdvancedMarkerElement({
+        position: click,
+        content: failImage,
+    });
+
+    markerFail.setMap(map);
+
+    setTimeout(()=>{
+      markerFail.setMap();
+    }, 500)
     
   }
 }
