@@ -1,15 +1,17 @@
 import {europeanCities} from "./city_list.js";
-//import {} from 
+
 
 /////////////////////////////////
 // Initialization of variables //
 /////////////////////////////////
 let map;
-var random_number = Math.floor(Math.random() * 101);
-let current_city = europeanCities[random_number];
-let question_text = document.getElementById("question-text");
-let next_button = document.getElementById("next-button");
-next_button.addEventListener("click", nextQuestion);
+var randomNumber = Math.floor(Math.random() * europeanCities.length);
+let currentCity = europeanCities[randomNumber];
+let questionText = document.getElementById("question-text");
+let nextButton = document.getElementById("next-button");
+let tipButton = document.getElementById("tip-button");
+let currentTip;
+
 
 ///////////////////////////////
 // Initialization of the map //
@@ -49,7 +51,7 @@ async function initMap() {
  
   // Initializing event listener
   google.maps.event.addListener(map, 'click', function(event) {
-    guessLocation(map, event.latLng);
+    guessLocation(event.latLng);
   });
 
   // Adding event listener for recentering the map
@@ -66,118 +68,193 @@ async function initMap() {
     recenterDiv.appendChild(recenterButton);
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(recenterDiv);
   })
+
+  // Adding event listener for next question
+  nextButton.addEventListener("click", nextQuestion);
+
+  // Adding event listener for tip
+  tipButton.addEventListener("click", getTip);
+
 }
 
 initMap();
+
 
 ////////////////////////////////////
 // Inizialization of the question //
 ////////////////////////////////////
 function startQuestion(){
-    question_text.innerText = "Where is " + current_city.name + "?";
-    next_button.classList.add("hide");
+    questionText.innerText = "Where is " + currentCity.name + "?";
+    nextButton.classList.add("hide");
+    tipButton.classList.remove('hide');
 }
 startQuestion();
+
 
 //////////////////////////
 // Functions for events //
 //////////////////////////
-function guessLocation(map, click){
+
+/* GUESS LOCATION
+This function checks whether the clicked location corresponds with the searched city */
+
+function guessLocation(click){
   // Getting current city location
-  let currentCityLocation = new google.maps.LatLng(current_city.lat, current_city.lng);
+  let currentCityLocation = new google.maps.LatLng(currentCity.lat, currentCity.lng);
 
   if (checkPlace(click, currentCityLocation) == true){
     // code executes in case of right guess
-    var circle_city = new google.maps.Circle({
-      center: currentCityLocation,
-      radius:10000,
-      strokeColor:"#0000FF",
-      strokeOpacity:0.4,
-      strokeWeight:2,
-      fillColor:"#0000FF",
-      fillOpacity:0.2
-    });
-    circle_city.setMap(map);
+    markCorrectGuess(click, currentCityLocation);
 
-    // Creating Marker with legacy Marker Element
-    /*const pinImage_svg = "http://127.0.0.1:5500/src/map_pin_small_new.svg";
-
-    var marker_city = new google.maps.Marker({
-      map: map,
-      position: click,
-      animation:google.maps.Animation.DROP,
-      icon: pinImage_svg,
-      //anchor: new google.maps.Point(0, -670)
-    });*/
-
-    // Creating Marker with Advanced Marker Element
-    const pinImage = document.createElement("img");
-    pinImage.src = "http://127.0.0.1:5500/src/map_pin_even_smaller.png";
-
-    const markerCity = new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: click,
-        content: pinImage,
-    });
-      
-    markerCity.setMap(map);
-    smoothlyZoomWorkarround(11, currentCityLocation);
-
-    var infowindow = new google.maps.InfoWindow({
-      content: "Congratulations! You found " + current_city.name +"!"
-    });
-    infowindow.open(map,markerCity);
-
-    window.setTimeout(() => {
-      infowindow.close();
-    }, 3000);
-
-    next_button.classList.remove('hide');
   } else {
-    //Todo animation for wrong guess
-    // Creating Marker with Advanced Marker Element
-    const failImage = document.createElement("img");
-    failImage.setAttribute("class", "fail-icon");
-    failImage.src = "http://127.0.0.1:5500/src/small_fail_icon.png";
-
-    const markerFail = new google.maps.marker.AdvancedMarkerElement({
-        position: click,
-        content: failImage,
-    });
-
-    markerFail.setMap(map);
-
-    setTimeout(()=>{
-      markerFail.setMap();
-    }, 500)
-    
+    // code executes in case of wrong guess
+    markWrongGuess(click);
   }
 }
 
+
+/* CHECK PLACE
+This function checks whether the clicked location corresponds with the searched city */
+
+function checkPlace(click, currentCityLocation){    
+  if (Math.abs(click.lat() - currentCityLocation.lat()) < 0.1 && Math.abs(click.lng() - currentCityLocation.lng()) < 0.1){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+/* CORRECT GUESS
+This function adds a circle around the city that's been found and adds an marker with an info window */
+
+function markCorrectGuess(click, currentCityLocation){
+  var circleCity = new google.maps.Circle({
+    center: currentCityLocation,
+    radius:10000,
+    strokeColor:"#0000FF",
+    strokeOpacity:0.4,
+    strokeWeight:2,
+    fillColor:"#0000FF",
+    fillOpacity:0.2
+  });
+  circleCity.setMap(map);
+
+  // Creating Marker with legacy Marker Element
+  /*const pinImage_svg = "http://127.0.0.1:5500/src/map_pin_small_new.svg";
+
+  var marker_city = new google.maps.Marker({
+    map: map,
+    position: click,
+    animation:google.maps.Animation.DROP,
+    icon: pinImage_svg,
+    //anchor: new google.maps.Point(0, -670)
+  });*/
+
+  // Creating Marker with Advanced Marker Element
+  const pinImage = document.createElement("img");
+  pinImage.src = "http://127.0.0.1:5500/src/map_pin_even_smaller.png";
+
+  const markerCity = new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: click,
+      content: pinImage,
+  });
+    
+  markerCity.setMap(map);
+  smoothlyZoomWorkarround(11, currentCityLocation);
+
+  var infowindow = new google.maps.InfoWindow({
+    content: "Congratulations! You found " + currentCity.name +"!"
+  });
+  infowindow.open(map,markerCity);
+
+  window.setTimeout(() => {
+    infowindow.close();
+  }, 3000);
+
+  tipButton.classList.add('hide');
+  nextButton.classList.remove('hide');
+  currentTip.setMap();
+}
+
+
+/* WRONG GUESS
+This function adds an animated marker in case of a wrong guess and */
+
+function markWrongGuess(click){
+  const failImage = document.createElement("img");
+  failImage.setAttribute("class", "fail-icon");
+  failImage.src = "http://127.0.0.1:5500/src/small_fail_icon.png";
+
+  const markerFail = new google.maps.marker.AdvancedMarkerElement({
+      position: click,
+      content: failImage,
+  });
+
+  markerFail.setMap(map);
+
+  setTimeout(()=>{
+    markerFail.setMap();
+  }, 500)
+}
+
+
+/* GET TIP
+This function creates a circle that is centered around a random point within 0-1° latitude and longitude from the current city's location*/
+
 function getTip (){
-  //TODO circle searched city
+  let almostLat = currentCity.lat + ranNum();
+  let almostLng = currentCity.lng + ranNum();
+  let almostCurrentCityLocation = new google.maps.LatLng(almostLat, almostLng);
+
+  currentTip = new google.maps.Circle({
+    center: almostCurrentCityLocation,
+    radius:150000,
+    strokeColor:"#0000FF",
+    strokeOpacity:0.2,
+    strokeWeight:1,
+    fillColor:"#0000FF",
+    fillOpacity:0.2,
+    clickable: false
+  });
+  currentTip.setMap(map);
+  smoothlyZoomWorkarround(map.getZoom(), almostCurrentCityLocation);
 }
 
 function removeTips(){
   //TODO remove all tips after city is found
 }
 
-function checkPlace(click, currentCityLocation){    
-    if (Math.abs(click.lat() - currentCityLocation.lat()) < 0.1 && Math.abs(click.lng() - currentCityLocation.lng()) < 0.1){
-      return true;
-    } else {
-      return false;
-    }
+
+/* RANDOM NUMBER BETWEEN -1 and 1 
+This function returns a random number  between -1 and 1 */
+function ranNum(){
+  let ranNum = Math.random();
+  let posOrNeg = Math.round(Math.random);
+  if (posOrNeg === 0){
+    ranNum *= -1;
+  }
+  return ranNum;
 }
 
+
+/* NEXT QUESTION
+This function initiates the next question */
+
 function nextQuestion(){
-    var new_random_number = Math.floor(Math.random() * 101);
-    if (new_random_number == random_number && new_random_number != 100){
+    // The city for the next question is extracted randomly from the europeanCities array
+    var new_random_number = Math.floor(Math.random() * europeanCities.length);
+    if (new_random_number == randomNumber && new_random_number != europeanCities.length){
         new_random_number += 1;
     }
-    current_city = europeanCities[new_random_number];
+    currentCity = europeanCities[new_random_number];
     startQuestion();
 }
+
+
+/* SMOOTHLY ZOOM
+This function makes the map zoom smoothely to the desired location */
 
 function smoothlyZoomWorkarround(desiredZoom, desiredLocation) {
   var initialZoom = map.getZoom();
@@ -218,6 +295,10 @@ function smoothlyZoomWorkarround(desiredZoom, desiredLocation) {
   smoothZoom(initialZoom);
 }
 
+
+/* USEFUL STUFF
+Other functions that might proof useful
+*/
 function useful_stuff() {  
     // How to add a marker
     /*var marker = new google.maps.Marker({

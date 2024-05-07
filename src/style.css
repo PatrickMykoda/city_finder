@@ -30,12 +30,13 @@ body {
     font-size: 3rem;
 }
 
-#next-button {
+#question-box button {
     padding: 10px;
     color: darkblue;
     font-size: 2rem;
     background-color: lightskyblue;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .hide {
